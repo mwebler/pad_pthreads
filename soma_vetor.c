@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
 	void *res;
 	int ret;
 	
-	/* Pelo menos 3 parametros: soma_vetor QTD_THREADS TAM_VETOR */
+	/* Pelo menos 2 parametros: soma_vetor QTD_THREADS TAM_VETOR */
 	if(argc < 3){
 		printf("Falta argumento \n");
 		return 1;
