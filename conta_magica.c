@@ -1,5 +1,5 @@
 /*
- * Aplicação paralela para soma de vetores utilizando pthreads
+ * Aplicação paralela de consumidor e produtor
  * Processamento de Alto Desempenho - Unisinos - 2016/1
  * 
  * Carolina Darski
@@ -35,29 +35,35 @@ int QTD_ACTIONS = 100;
 sem_t mutex_cons;
 sem_t mutex_prod;
 
-/* Função de soma de vetores. Recebe como parâmetro thread_info */
+/* Função de consumidor e produtor para mudar conta. 
+Recebe como parâmetro thread_info dizendo se é produtor ou consumidor */
 static void * change_balance(void *arg){
 	struct thread_info *tinfo = arg;
-
-	for(int i = 0; i < tinfo->qty_actions; i++){
-		pthread_mutex_lock(&conta_magica->acc_lock);
+		
+	
+	for(int i = 0; i < tinfo->qty_actions; i++){		
+		/* Se thread é consumidora */
 		if( tinfo->consumer ){
-			if( conta_magica->actual_amount - 1 < conta_magica->min_amount ){
-				printf("Esbarrou no limite mínimo");			
+			while( conta_magica->actual_amount <= conta_magica->min_amount ){
+				printf("Esbarrou no limite minimo\n");			
 				sem_wait (&mutex_cons);
 			}
+			pthread_mutex_lock(&conta_magica->acc_lock);
 			conta_magica->actual_amount--;
+			pthread_mutex_unlock(&conta_magica->acc_lock);
 			sem_post(&mutex_prod);
-		}else{
-			if( conta_magica->actual_amount + 1 > conta_magica->max_amount ){
-				printf("Esbarrou no limite máximo");
+		}else{ /* Se thread é produtora */
+			while( conta_magica->actual_amount >= conta_magica->max_amount ){
+				printf("Esbarrou no limite maximo\n");
 				sem_wait (&mutex_prod);
 			}
+			pthread_mutex_lock(&conta_magica->acc_lock);
 			conta_magica->actual_amount++;
+			pthread_mutex_unlock(&conta_magica->acc_lock);
 			sem_post(&mutex_cons);
 		}
-		pthread_mutex_unlock(&conta_magica->acc_lock);
 	}
+	
 	
 	return NULL;
 }
@@ -96,8 +102,8 @@ int main(int argc, char* argv[]){
 
 	printf("Escroto humano");
 
-	//É o mais recomendado?
-	conta_magica->actual_amount = conta_magica->max_amount;
+	//É o mais recomendado? Começa com metade
+	conta_magica->actual_amount = conta_magica->max_amount / 2;
 
 	if( pthread_mutex_init(&conta_magica->acc_lock, NULL) != 0 ){
 		printf("\n não foi possível inicializar a conta.");
