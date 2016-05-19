@@ -1,6 +1,6 @@
 /*
  * Aplicação paralela para soma de vetores utilizando pthreads
- * Processamento de Alto Desempenho - Unisinos - 2016/2
+ * Processamento de Alto Desempenho - Unisinos - 2016/1
  * 
  * Carolina Darski
  * Everton Correa
